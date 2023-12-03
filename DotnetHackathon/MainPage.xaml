@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="DotnetHackathon.MainPage" BackgroundColor="#2d3436">
+
+    <Frame  Margin="20,20,20,20" BackgroundColor="#ffeaa7">
+        <Grid RowDefinitions="0.85*,0.15*">
+    <ScrollView  x:Name="ScrollMaster"> 
+                <VerticalStackLayout Spacing="5">
+                    <Label Text="Points:" x:Name="PointsLabel" FontSize="15" HorizontalOptions="Center"/>
+                    <Label Text="Story" FontSize="25" TextColor="Black" Margin="10,0,0,0"/>
+                    <Frame Grid.Row="1" BackgroundColor="#636e72">
+
+                        <Label x:Name="Answer" Text="" MinimumHeightRequest="100" TextColor="Black" Grid.Row="0">
+                            <Label.FormattedText>
+                                <FormattedString x:Name="Span">
+
+                                </FormattedString>
+                            </Label.FormattedText>
+                        </Label>
+                    </Frame>
+                        <Label Text="Refined Story" TextColor="Black" FontSize="25" Margin="10,20,0,0" />
+                    <Frame Grid.Row="1" BackgroundColor="#636e72">
+                            <Label x:Name="Redone" TextColor="Black" MinimumHeightRequest="100" Text="" />
+                    </Frame>
+                </VerticalStackLayout>
+    </ScrollView>
+            <Grid RowDefinitions=".3*,.7*" Grid.Row="1">
+                <CollectionView x:Name="SuggestedWords" ItemsSource="{Binding Words}" ZIndex="1" Scale="0.75" Grid.Row="0" Grid.RowSpan="2" Margin="0,0,20,20" HorizontalOptions="End">
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout Orientation="Horizontal" ItemSpacing="7"/>
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <StackLayout>
+                                <Button Text="{Binding Word}" TextColor="Black" ZIndex="1"/>
+                            </StackLayout>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+
+                <Entry x:Name="Entrada" Completed="Entry_Completed" HorizontalOptions="Fill" Margin="0,0,55,0" VerticalOptions="End" BackgroundColor="#2d3436" HeightRequest="50" Grid.Row="1"/>
+                <Button x:Name="ButtonSend" HeightRequest="50" ImageSource="send.png" WidthRequest="50" Clicked="Entry_Completed" HorizontalOptions="End" VerticalOptions="End" Grid.Row="1"></Button>
+                <Button x:Name="ButtonRestart" HeightRequest="50" ImageSource="redo.png" WidthRequest="50" Clicked="ButtonRestart_Clicked" HorizontalOptions="Center" IsVisible="false" Grid.Row="1" VerticalOptions="End"></Button>
+            </Grid>
+        </Grid>
+            </Frame>
+
+</ContentPage>
