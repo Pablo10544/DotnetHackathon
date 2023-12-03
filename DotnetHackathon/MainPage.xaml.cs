@@ -19,7 +19,8 @@ namespace DotnetHackathon
         string RefinedStoryMessage = "Em no maximo 400 palavras reescreva a historia como se fosse um renomado autor e de um fim engraçado para:";
         string KeepWritingMessage = "Em no maximo de 15 palavras continue:";
         string ImageFromStoryMessage = "Crie uma descrição muito fofa de alguma parte da história em no maximo 50 palavras para ser usada em um modelo de geração de imagem, não use palavras que viole o filtro de palavras seguras";
-        string ImageDescription = "";
+        string PreSugestionWord = "relacionado a história:";
+        string PosSugestionWord = "\n sugira 3 palavra para o usuário usar, escreva apenas as palavras separadas por virgulas";
         public ObservableCollection<WordsSuggestion> Words { get; set; }
         public MainPage()
         {
@@ -37,10 +38,14 @@ namespace DotnetHackathon
         }
         async void ReceiveMessageAsync() {
             string s = await client.GetMessage();
-            story += s;
+            story += RemoveWordsFromMessage(s);
             UpdateSpan(s,Color.FromRgba(250, 177, 160, 255));
             SuggestWords();
 
+        }
+        public string RemoveWordsFromMessage(string message) {
+           string messageCorrected= message.Replace(KeepWritingMessage,"");
+            return messageCorrected;
         }
         async void ReceiveRedoneTextAsync()
         {
@@ -48,15 +53,18 @@ namespace DotnetHackathon
             Redone.Text = s;
 
         }
+        public string RemoveWordsFromSuggestion(string word) {
+           string wordFixed= word.Replace("sugira 3 palavra para o usuário usar", "").Replace(".", "");
+            return wordFixed;
+        }
         async void SuggestWords(int length=3) {
 
-            string s2 = "relacionado a história:" + story + "    sugira 3 palavra para o usuário usar, escreva apenas as palavras separadas por virgulas";
+            string s2 = PreSugestionWord + story + PosSugestionWord;
             client2.AddMessage(s2,ChatRole.User);
             string response = await client2.GetMessage();
             foreach(string word in response.Split(','))
             {
-                //fazer tratamento para word removendo as palavras sugerindo e "sugira 3 palavra para o usuário usar"
-                WordsSuggestion ws = new WordsSuggestion(word,3,true);
+                WordsSuggestion ws = new WordsSuggestion(RemoveWordsFromSuggestion(word),3,true);
             Words.Add(ws);
             }
 
@@ -131,7 +139,8 @@ namespace DotnetHackathon
             Words.Clear();
             story = "";
             Redone.Text = "";
-            ImageDescription = "";
+            Points = 0;
+            PointsLabel.Text = "Pontos: "+Points;
             var formattedString = new FormattedString();
             Answer.FormattedText = formattedString;
             ButtonSend.IsVisible = true;
