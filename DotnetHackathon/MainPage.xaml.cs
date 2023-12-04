@@ -14,13 +14,12 @@ namespace DotnetHackathon
         int count = 0;
         int Points { get; set; }   
         string story="";
-        string SystemMessage = "continue a história com tema de suspense";
-        string EndMessage = "crie um final muito engraçado para terminando com a palavra FIM:";
-        string RefinedStoryMessage = "Em no maximo 400 palavras reescreva a historia como se fosse um renomado autor e de um fim engraçado para:";
-        string KeepWritingMessage = "Em no maximo de 15 palavras continue:";
-        string ImageFromStoryMessage = "Crie uma descrição muito fofa de alguma parte da história em no maximo 50 palavras para ser usada em um modelo de geração de imagem, não use palavras que viole o filtro de palavras seguras";
-        string PreSugestionWord = "relacionado a história:";
-        string PosSugestionWord = "\n sugira 3 palavra para o usuário usar, escreva apenas as palavras separadas por virgulas";
+        string SystemMessage = "continue the story with a suspense theme";
+        string EndMessage = "\n create an ending to the story above, ending with the word END";
+        string RefinedStoryMessage = "\n rewrite the story above as if you were a renowned author,keep the ending, In no more than 200 words and two paragraphs.";
+        string KeepWritingMessage = "In no more than 15 words continue the story:";
+        string PreSugestionWord = "related to the story:";
+        string PosSugestionWord = "\n suggest 3 words for the user to use, write only the words separated by commas";
         public ObservableCollection<WordsSuggestion> Words { get; set; }
         public MainPage()
         {
@@ -39,12 +38,12 @@ namespace DotnetHackathon
         async void ReceiveMessageAsync() {
             string s = await client.GetMessage();
             story += RemoveWordsFromMessage(s);
-            UpdateSpan(s,Color.FromRgba(250, 177, 160, 255));
+            UpdateSpan(RemoveWordsFromMessage(s), Color.FromRgba(250, 177, 160, 255));
             SuggestWords();
 
         }
         public string RemoveWordsFromMessage(string message) {
-           string messageCorrected= message.Replace(KeepWritingMessage,"");
+           string messageCorrected= message.Replace(KeepWritingMessage,"").Replace("In no more than 15 words continue the story","");
             return messageCorrected;
         }
         async void ReceiveRedoneTextAsync()
@@ -54,20 +53,21 @@ namespace DotnetHackathon
 
         }
         public string RemoveWordsFromSuggestion(string word) {
-           string wordFixed= word.Replace("sugira 3 palavra para o usuário usar", "").Replace(".", "");
+           string wordFixed= word.Replace("suggest 3 words for the user to use", "").Replace(".", "").Replace(PreSugestionWord,"").ToLower();
             return wordFixed;
         }
         async void SuggestWords(int length=3) {
-
-            string s2 = PreSugestionWord + story + PosSugestionWord;
-            client2.AddMessage(s2,ChatRole.User);
-            string response = await client2.GetMessage();
-            foreach(string word in response.Split(','))
+            if (Words.Count < 4)
             {
-                WordsSuggestion ws = new WordsSuggestion(RemoveWordsFromSuggestion(word),3,true);
-            Words.Add(ws);
+                string s2 = PreSugestionWord + story + PosSugestionWord;
+                client2.AddMessage(s2, ChatRole.User);
+                string response = await client2.GetMessage();
+                foreach (string word in response.Split(','))
+                {
+                    WordsSuggestion ws = new WordsSuggestion(RemoveWordsFromSuggestion(word), 3, true);
+                    Words.Add(ws);
+                }
             }
-
             
         }
         void UpdateSpan(string message,Color color) {
@@ -84,7 +84,7 @@ namespace DotnetHackathon
             if (senderEntry.Text == null || senderEntry.Text == " ") {
                 return;
             }
-                if (count >=2) {
+                if (count >=3) {
                 FinishWritingStory(senderEntry);
             } else {
                 KeepWritingStory(senderEntry);
@@ -94,11 +94,10 @@ namespace DotnetHackathon
         }
         public void FinishWritingStory(Entry senderEntry) {
             GetPoints(senderEntry.Text);
-            client.AddMessage(EndMessage + story, ChatRole.User);
+            client.AddMessage( story+ EndMessage, ChatRole.User);
             ReceiveMessageAsync();
-            client.AddMessage(RefinedStoryMessage + story, ChatRole.User);
+            client.AddMessage(story+ RefinedStoryMessage, ChatRole.User);
             ReceiveRedoneTextAsync();
-            client.AddMessage(ImageFromStoryMessage,ChatRole.User);
             senderEntry.IsEnabled = false;
             senderEntry.IsVisible = false;
             ButtonSend.IsVisible = false;
